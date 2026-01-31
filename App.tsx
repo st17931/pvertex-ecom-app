@@ -1,45 +1,41 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+import RootNavigator from './src/navigation/RootNavigator';
+import { useState, useEffect, useCallback } from 'react';
+import { View, Text } from 'react-native';
+import * as Keychain from 'react-native-keychain';
+import { setAuthToken } from './src/redux/authSlice';
+import { useDispatch } from 'react-redux';
 
 function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+  const [loadingToken, setLoadingToken] = useState(false);
+  const dispatch = useDispatch();
 
-  return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
-  );
+  const getTokenFromSecureStorage = useCallback(async () => {
+    setLoadingToken(true);
+    try {
+      const credentials = await Keychain.getGenericPassword({
+        service: 'psquare_ecom_key',
+      });
+      dispatch(setAuthToken(credentials?.token || ''));
+    } catch (error) {
+      console.error('Got some error while geting secure token', error);
+    } finally {
+      setLoadingToken(false);
+    }
+  }, [dispatch]);
+
+  useEffect(() => {
+    getTokenFromSecureStorage();
+  }, [getTokenFromSecureStorage]);
+
+  if (loadingToken) {
+    return (
+      <View>
+        <Text>Hi</Text>
+      </View>
+    );
+  }
+
+  return <RootNavigator />;
 }
-
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
 
 export default App;
