@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,11 +6,50 @@ import {
   TouchableOpacity,
   StyleSheet,
   StatusBar,
+  Alert,
 } from 'react-native';
+import { loginUser } from '../../../utils/firebase/auth';
 
 import { Link } from '@react-navigation/native';
 
+type LoginData = {
+  email: string;
+  password: string;
+};
+
+type ErrorState = {
+  email?: boolean;
+  password?: boolean;
+};
+
 export default function LoginScreen() {
+  const [loginData, setLoginData] = useState<LoginData>({
+    email: '',
+    password: '',
+  });
+
+  const [errors, setErrors] = useState<ErrorState>({});
+
+  const validate = (): boolean => {
+    const newErrors: ErrorState = {};
+    if (!loginData.password.trim()) newErrors.password = true;
+    if (!loginData.email.includes('@')) newErrors.email = true;
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleLogin = async () => {
+    if (!validate()) return;
+    try {
+      let response = await loginUser(loginData.email, loginData.password);
+      console.log('reponse in login', response);
+      Alert.alert('Logged in successfully');
+    } catch (error: any) {
+      Alert.alert('Login Failed', error.message);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -26,14 +65,20 @@ export default function LoginScreen() {
         <TextInput
           placeholder="Email address"
           placeholderTextColor="#888"
-          style={styles.input}
+          style={[styles.input, errors.email && styles.errorInput]}
+          onChangeText={(text: string) =>
+            setLoginData(prev => ({ ...prev, email: text }))
+          }
         />
 
         <TextInput
           placeholder="Password"
           placeholderTextColor="#888"
           secureTextEntry
-          style={styles.input}
+          style={[styles.input, errors.password && styles.errorInput]}
+          onChangeText={(text: string) =>
+            setLoginData(prev => ({ ...prev, password: text }))
+          }
         />
 
         <TouchableOpacity style={styles.forgotContainer}>
@@ -41,8 +86,8 @@ export default function LoginScreen() {
         </TouchableOpacity>
 
         {/* Button */}
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>SIGN UP</Text>
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <Text style={styles.buttonText}>LOG IN</Text>
         </TouchableOpacity>
       </View>
 
@@ -135,5 +180,8 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '600',
     textDecorationLine: 'underline',
+  },
+  errorInput: {
+    borderBottomColor: 'red',
   },
 });

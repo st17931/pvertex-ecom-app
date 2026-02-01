@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,61 +7,134 @@ import {
   StyleSheet,
   StatusBar,
   Platform,
+  Alert,
 } from 'react-native';
 import { Link } from '@react-navigation/native';
+import { signupUser } from '../../../utils/firebase/auth';
+// import * as Keychain from 'react-native-keychain';
+
+type UserData = {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
+
+type ErrorState = {
+  name?: boolean;
+  email?: boolean;
+  password?: boolean;
+  confirmPassword?: boolean;
+};
 
 export default function RegisterScreen() {
+  const [userData, setUserData] = useState<UserData>({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+
+  const [errors, setErrors] = useState<ErrorState>({});
+
+  const validate = (): boolean => {
+    const newErrors: ErrorState = {};
+
+    if (!userData.name.trim()) newErrors.name = true;
+
+    if (!userData.email.includes('@')) newErrors.email = true;
+
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+
+    if (!passwordRegex.test(userData.password)) newErrors.password = true;
+
+    if (userData.password !== userData.confirmPassword) {
+      newErrors.confirmPassword = true;
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSignup = async () => {
+    if (!validate()) return;
+    console.log('email and password is', userData.email, userData.password);
+    try {
+      let reponse = await signupUser(userData.email, userData.password);
+      console.log('reponse', reponse);
+      Alert.alert('Success', 'Account created successfully!');
+      //   await Keychain.setGenericPassword(token, { service: 'psquare_ecom_key' });
+    } catch (error: any) {
+      Alert.alert('Signup Failed', error.message);
+    } finally {
+      setUserData({
+        name: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+      });
+    }
+  };
+
   return (
     <View style={styles.container}>
-      {/* Status Bar */}
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor="#0B0B0B"
-        translucent={false}
-      />
+      <StatusBar barStyle="light-content" backgroundColor="#0B0B0B" />
 
-      {/* Heading */}
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Create</Text>
         <Text style={styles.title}>your account</Text>
       </View>
 
-      {/* Form */}
       <View style={styles.form}>
         <TextInput
           placeholder="Enter your name"
           placeholderTextColor="#888"
-          style={styles.input}
+          style={[styles.input, errors.name && styles.errorInput]}
+          value={userData.name}
+          onChangeText={(text: string) =>
+            setUserData(prev => ({ ...prev, name: text }))
+          }
         />
 
         <TextInput
           placeholder="Email address"
           placeholderTextColor="#888"
           keyboardType="email-address"
-          style={styles.input}
+          style={[styles.input, errors.email && styles.errorInput]}
+          value={userData.email}
+          onChangeText={(text: string) =>
+            setUserData(prev => ({ ...prev, email: text }))
+          }
         />
 
         <TextInput
           placeholder="Password"
           placeholderTextColor="#888"
           secureTextEntry
-          style={styles.input}
+          style={[styles.input, errors.password && styles.errorInput]}
+          value={userData.password}
+          onChangeText={(text: string) =>
+            setUserData(prev => ({ ...prev, password: text }))
+          }
         />
 
         <TextInput
           placeholder="Confirm password"
           placeholderTextColor="#888"
           secureTextEntry
-          style={styles.input}
+          style={[styles.input, errors.confirmPassword && styles.errorInput]}
+          value={userData.confirmPassword}
+          onChangeText={(text: string) =>
+            setUserData(prev => ({ ...prev, confirmPassword: text }))
+          }
         />
 
-        {/* Button */}
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={handleSignup}>
           <Text style={styles.buttonText}>SIGN UP</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Bottom Link */}
       <View style={styles.bottomContainer}>
         <Text style={styles.bottomText}>
           Already have account?{' '}
@@ -77,6 +150,7 @@ export default function RegisterScreen() {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -139,5 +213,8 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontWeight: '600',
     textDecorationLine: 'underline',
+  },
+  errorInput: {
+    borderBottomColor: 'red',
   },
 });
