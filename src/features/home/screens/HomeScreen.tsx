@@ -14,7 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getAllProducts } from '../../../api/endpointFunction';
 
-type CategoryKey = 'Hola1' | 'Electronics' | 'Furniture' | 'Shoes';
+type CategoryKey = 'Miscellaneous' | 'Electronics' | 'Furniture' | 'Shoes';
 
 type Product = {
   id: number;
@@ -31,14 +31,14 @@ export default function HomeScreen() {
   const [categoriesWiseProduct, setCategoryWiseProducts] = useState<
     Record<CategoryKey, Product[]>
   >({
-    Hola1: [],
+    Miscellaneous: [],
     Electronics: [],
     Furniture: [],
     Shoes: [],
   });
 
   const [selectedCategory, setSelectedCategory] =
-    useState<CategoryKey>('Hola1');
+    useState<CategoryKey>('Miscellaneous');
 
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
@@ -52,7 +52,7 @@ export default function HomeScreen() {
       const response: Product[] = await getAllProducts();
 
       const grouped: Record<CategoryKey, Product[]> = {
-        Hola1: [],
+        Miscellaneous: [],
         Electronics: [],
         Furniture: [],
         Shoes: [],
@@ -72,7 +72,7 @@ export default function HomeScreen() {
   };
 
   const products = categoriesWiseProduct[selectedCategory];
-  const half = Math.floor(products.length / 2);
+  const half = Math.floor(products?.length / 2);
 
   return (
     <SafeAreaView style={styles.safe}>

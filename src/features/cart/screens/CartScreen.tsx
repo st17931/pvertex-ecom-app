@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   FlatList,
   StatusBar,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
@@ -37,6 +38,14 @@ export default function CartScreen() {
 
   const decreaseQty = (id: number) => {
     dispatch(decQuantity(id));
+  };
+
+  const handleProceedToCheckout = () => {
+    if (cartItems.length) {
+      navigation.navigate('CheckoutScreenOne');
+      return;
+    }
+    Alert.alert('PLease add something to the cart in order to proceed');
   };
 
   const subtotal = cartItems.reduce(
@@ -115,14 +124,18 @@ export default function CartScreen() {
           <Text style={styles.subtotalValue}>${subtotal.toFixed(2)}</Text>
         </View>
 
-        <TouchableOpacity style={styles.checkoutBtn}>
-          <Link
+        <TouchableOpacity
+          style={styles.checkoutBtn}
+          onPress={handleProceedToCheckout}
+        >
+          {/* <Link
             style={styles.checkoutText}
             screen="CheckoutScreenOne"
             params={{ userName: 'Guest' }}
           >
             Proceed to checkout
-          </Link>
+          </Link> */}
+          <Text>Proceed to checkout</Text>
         </TouchableOpacity>
       </View>
     </View>

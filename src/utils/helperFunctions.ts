@@ -11,3 +11,20 @@ export const buildQueryParams = (params: Record<string, any>): string => {
 
   return query ? `?${query}` : '';
 };
+
+export const validateFields = obj => {
+  for (const key in obj) {
+    const value = obj[key];
+
+    if (
+      value === '' ||
+      value === null ||
+      value === undefined ||
+      value.trim?.() === ''
+    ) {
+      return [false, key];
+    }
+  }
+
+  return [true];
+};

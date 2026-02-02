@@ -1,10 +1,9 @@
 import { NavigationContainer } from '@react-navigation/native';
-import MainTabNavigator from './MainTabNavigator';
+import SplashScreen from '../features/auth/screens/SplashScreen';
 import AuthNavigator from './AuthNavigator';
 import MainStackNavigator from './MainStackNavigator';
 import { subscribeToAuthChanges } from '../utils/firebase/auth';
 import { useState, useEffect } from 'react';
-import { View, Text } from 'react-native';
 import { User } from 'firebase/auth';
 
 export default function RootNavigator() {
@@ -21,11 +20,7 @@ export default function RootNavigator() {
   }, []);
 
   if (loading) {
-    return (
-      <View>
-        <Text>Hi</Text>
-      </View>
-    );
+    return <SplashScreen />;
   }
 
   return (

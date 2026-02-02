@@ -7,15 +7,35 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  Alert,
 } from 'react-native';
 import ShippingOption from '../components/ShippingOption';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { Link } from '@react-navigation/native';
+
+import { validateFields } from '../../../utils/helperFunctions';
 
 export default function CheckoutScreenOne() {
   const [selectedShipping, setSelectedShipping] = useState(0);
+  const [shippingDetail, setShippingDetails] = useState({
+    firstName: '',
+    lastName: '',
+    country: '',
+    streetName: '',
+    city: '',
+    state: '',
+    zipCode: '',
+  });
   const navigation = useNavigation();
+
+  const continueToPaymentHandler = () => {
+    const isDataComplete = validateFields(shippingDetail)[0];
+    if (isDataComplete) {
+      navigation.navigate('CheckoutScreenTwo');
+      return;
+    }
+    Alert.alert(`Please fill all fields`);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -49,44 +69,93 @@ export default function CheckoutScreenOne() {
         <View style={styles.inputGroup}>
           <Text style={styles.label}>First name *</Text>
           <TextInput
+            value={shippingDetail?.firstName}
             style={styles.input}
-            placeholder="Pham"
+            placeholder="Enter First Name"
             placeholderTextColor="#aaa"
+            onChangeText={value =>
+              setShippingDetails(prev => ({ ...prev, firstName: value }))
+            }
           />
         </View>
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Last name *</Text>
-          <TextInput style={[styles.input, styles.inputError]} />
-          <Text style={styles.errorText}>Field is required</Text>
+          <TextInput
+            style={[styles.input]}
+            value={shippingDetail?.lastName}
+            placeholder="Enter Last Name"
+            placeholderTextColor="#aaa"
+            onChangeText={value =>
+              setShippingDetails(prev => ({ ...prev, lastName: value }))
+            }
+          />
+          {/* <Text style={styles.errorText}>Field is required</Text> */}
         </View>
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Country *</Text>
-          <View style={styles.dropdown}>
-            <Text style={{ color: '#aaa' }}>Select country</Text>
-            <Text style={{ color: '#aaa' }}>⌄</Text>
-          </View>
+          <TextInput
+            style={[styles.input]}
+            value={shippingDetail?.country}
+            placeholder="Enter Country Name"
+            placeholderTextColor="#aaa"
+            onChangeText={value =>
+              setShippingDetails(prev => ({ ...prev, country: value }))
+            }
+          />
         </View>
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Street name *</Text>
-          <TextInput style={styles.input} />
+          <TextInput
+            style={styles.input}
+            value={shippingDetail?.streetName}
+            placeholder="Enter Street Name"
+            placeholderTextColor="#aaa"
+            onChangeText={value =>
+              setShippingDetails(prev => ({ ...prev, streetName: value }))
+            }
+          />
         </View>
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>City *</Text>
-          <TextInput style={styles.input} />
+          <TextInput
+            style={styles.input}
+            value={shippingDetail?.city}
+            placeholder="Enter City Name"
+            placeholderTextColor="#aaa"
+            onChangeText={value =>
+              setShippingDetails(prev => ({ ...prev, city: value }))
+            }
+          />
         </View>
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>State / Province</Text>
-          <TextInput style={styles.input} />
+          <TextInput
+            style={styles.input}
+            value={shippingDetail?.state}
+            placeholder="Enter State Name"
+            placeholderTextColor="#aaa"
+            onChangeText={value =>
+              setShippingDetails(prev => ({ ...prev, state: value }))
+            }
+          />
         </View>
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Zip-code *</Text>
-          <TextInput style={styles.input} />
+          <TextInput
+            style={styles.input}
+            value={shippingDetail?.zipCode}
+            placeholder="Enter zipCode Name"
+            placeholderTextColor="#aaa"
+            onChangeText={value =>
+              setShippingDetails(prev => ({ ...prev, zipCode: value }))
+            }
+          />
         </View>
 
         <View style={styles.inputGroup}>
@@ -141,14 +210,18 @@ export default function CheckoutScreenOne() {
 
       {/* CONTINUE BUTTON */}
       <View style={styles.bottomBar}>
-        <TouchableOpacity style={styles.continueBtn}>
-          <Link
+        <TouchableOpacity
+          style={styles.continueBtn}
+          onPress={continueToPaymentHandler}
+        >
+          {/* <Link
             style={styles.continueText}
             screen="CheckoutScreenTwo"
             params={{ userName: 'Guest' }}
           >
             Continue to payment
-          </Link>
+          </Link> */}
+          <Text>Continue to payment</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
