@@ -11,9 +11,11 @@ import {
   Dimensions,
   FlatList,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { CommonActions, useNavigation } from '@react-navigation/native';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { getProductByID } from '../../../api/endpointFunction';
+import { useDispatch } from 'react-redux';
+import { addProductToCart } from '../../../redux/cartSlice';
 
 type RootStackParamList = {
   ProductDetails: { productId: number };
@@ -39,6 +41,8 @@ export default function ProductDetailsScreen() {
   const route = useRoute<ProductRouteProp>();
   const { productId } = route.params;
 
+  const dispatch = useDispatch();
+
   const [activeIndex, setActiveIndex] = useState(0);
   const [product, setProduct] = useState({});
   const [loading, setLoading] = useState(false);
@@ -55,9 +59,41 @@ export default function ProductDetailsScreen() {
     }
   };
 
+  const addToCartHandler = (product: any) => {
+    dispatch(
+      addProductToCart({
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        image: product.images[0],
+        size: 'L',
+        color: 'Cream',
+        qty: 1,
+      }),
+    );
+    Alert.alert('Product Succesfully added to the cart');
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'MainTabs',
+            state: {
+              routes: [
+                {
+                  name: 'Cart',
+                },
+              ],
+            },
+          },
+        ],
+      }),
+    );
+  };
+
   useEffect(() => {
     fetchProduct(productId);
-  }, []);
+  }, [productId]);
 
   return (
     <View style={styles.container}>
@@ -259,7 +295,10 @@ export default function ProductDetailsScreen() {
       </ScrollView>
 
       <View style={styles.cartBar}>
-        <TouchableOpacity style={styles.cartBtn}>
+        <TouchableOpacity
+          style={styles.cartBtn}
+          onPress={() => addToCartHandler(product)}
+        >
           <Text style={styles.cartText}>Add To Cart</Text>
         </TouchableOpacity>
       </View>
